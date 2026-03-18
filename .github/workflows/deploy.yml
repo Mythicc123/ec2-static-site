@@ -1,0 +1,65 @@
+name: Deploy to EC2
+
+# Triggers on every push to main that touches the site/ directory
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'site/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    name: SSH Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------------------------------------------
+      # 1. Check out the repo so we have the site/ files
+      # -------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------
+      # 2. Install rsync (pre-installed on ubuntu-latest, but explicit is safer)
+      # -------------------------------------------------------
+      - name: Install rsync
+        run: sudo apt-get install -y rsync
+
+      # -------------------------------------------------------
+      # 3. Write SSH private key from GitHub Secret to a temp file
+      # EC2_SSH_KEY  — your .pem file contents (base64 encoded)
+      # EC2_HOST     — the Elastic IP output from Terraform
+      # EC2_USER     — 'ubuntu' for Ubuntu AMIs
+      # -------------------------------------------------------
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      # -------------------------------------------------------
+      # 4. Sync site/ directory to Nginx web root via rsync over SSH
+      # --delete removes files on the server that no longer exist locally
+      # -------------------------------------------------------
+      - name: Deploy site files
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            ./site/ \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/html/
+
+      # -------------------------------------------------------
+      # 5. Reload Nginx to pick up any config changes
+      # -------------------------------------------------------
+      - name: Reload Nginx
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            'sudo systemctl reload nginx'
+
+      - name: Done
+        run: echo "Deployed successfully to http://${{ secrets.EC2_HOST }}"
