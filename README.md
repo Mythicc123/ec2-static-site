@@ -4,6 +4,8 @@
 
 [![Deploy to EC2](https://github.com/Mythicc123/ec2-static-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/Mythicc123/ec2-static-site/actions/workflows/deploy.yml)
 
+🌐 **Live site:** [http://54.66.248.75](http://54.66.248.75)
+
 ---
 
 ## Architecture
@@ -44,7 +46,7 @@
 
 | Layer | Technology |
 |---|---|
-| Compute | AWS EC2 (t2.micro, Ubuntu 22.04 LTS) |
+| Compute | AWS EC2 (t3.micro, Ubuntu 22.04 LTS) |
 | Web server | Nginx |
 | Provisioning | Terraform ≥ 1.5 |
 | CI/CD | GitHub Actions |
@@ -103,6 +105,7 @@ Create a `terraform/terraform.tfvars` file (this is gitignored — never commit 
 ```hcl
 key_pair_name = "your-key-pair-name"   # Name in AWS Console, not the filename
 domain_name   = "yourdomain.com"       # Leave as "" to skip Route 53 + HTTPS
+instance_type = "t3.micro"             # Free tier in ap-southeast-2
 ```
 
 ### Step 3 — Provision infrastructure
@@ -139,7 +142,14 @@ cat /var/log/setup.log
 
 Visit `http://<public_ip>` in your browser — you should see the site.
 
-### Step 5 — Configure GitHub Actions secrets
+### Step 5 — Fix web root permissions
+
+```bash
+# Allow the ubuntu user to write to the Nginx web root (required for CI/CD rsync)
+sudo chown -R ubuntu:ubuntu /var/www/html
+```
+
+### Step 6 — Configure GitHub Actions secrets
 
 In your GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**
 
@@ -153,7 +163,7 @@ Now push any change to `site/index.html` — the GitHub Action will automaticall
 
 ---
 
-### Step 6 — Enable HTTPS (Stretch Goal)
+### Step 7 — Enable HTTPS (Stretch Goal)
 
 > Requires a domain name pointed at your Elastic IP via Route 53 (Terraform handles the DNS record if `domain_name` is set).
 
@@ -187,7 +197,7 @@ terraform destroy   # Removes ALL provisioned resources (EC2, EIP, security grou
 
 ### What is EC2?
 
-EC2 (Elastic Compute Cloud) is AWS's virtual machine service. You rent a server that runs in AWS's data centre — you choose the OS (Ubuntu here), CPU/RAM (t2.micro = 1 vCPU, 1 GB RAM), and storage. It's "elastic" because you can resize it or spin up hundreds more in minutes.
+EC2 (Elastic Compute Cloud) is AWS's virtual machine service. You rent a server that runs in AWS's data centre — you choose the OS (Ubuntu here), CPU/RAM (t3.micro = 2 vCPU, 1 GB RAM), and storage. It's "elastic" because you can resize it or spin up hundreds more in minutes.
 
 ### What is a Security Group?
 
