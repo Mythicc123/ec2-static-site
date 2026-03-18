@@ -4,7 +4,7 @@
 
 [![Deploy to EC2](https://github.com/Mythicc123/ec2-static-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/Mythicc123/ec2-static-site/actions/workflows/deploy.yml)
 
-🌐 **Live site:** [http://54.66.248.75](http://54.66.248.75)
+🌐 **Live site:** [http://54.66.248.75](http://54.66.248.75) &nbsp;|&nbsp; 📋 **Project spec:** [roadmap.sh/projects/ec2-instance](https://roadmap.sh/projects/ec2-instance)
 
 ---
 
@@ -256,4 +256,4 @@ Let's Encrypt is a free Certificate Authority that issues TLS certificates for H
 
 ---
 
-*Deployed in AWS ap-southeast-2 (Sydney)*
+*Deployed in AWS ap-southeast-2 (Sydney) — built as part of the [roadmap.sh EC2 Instance project](https://roadmap.sh/projects/ec2-instance)*
