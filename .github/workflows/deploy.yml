@@ -1,13 +1,7 @@
 name: Deploy to EC2
 
-# Triggers on every push to main that touches the site/ directory
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'site/**'
-      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:
