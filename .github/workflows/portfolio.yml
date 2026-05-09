@@ -1,0 +1,59 @@
+name: Portfolio
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'apply or destroy'
+        required: true
+        default: 'apply'
+        type: choice
+        options: [apply, destroy]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.action }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-southeast-2
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+
+      - name: Terraform Init
+        run: terraform init -reconfigure -input=false
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: |
+          terraform apply -auto-approve -input=false \
+            -var="key_pair_name=${{ secrets.KEY_PAIR_NAME }}" \
+            -var="ami_id=${{ secrets.AMI_ID }}"
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: |
+          terraform destroy -auto-approve -input=false \
+            -target=aws_instance.web \
+            -target=aws_eip.web \
+            -target=aws_security_group.web \
+            -var="key_pair_name=${{ secrets.KEY_PAIR_NAME }}" \
+            -var="ami_id=${{ secrets.AMI_ID }}"
+
+      - name: Show outputs
+        if: github.event.inputs.action == 'apply'
+        run: terraform output
