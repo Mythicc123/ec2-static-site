@@ -4,7 +4,7 @@
 
 [![Deploy to EC2](https://github.com/Mythicc123/ec2-static-site/actions/workflows/deploy.yml/badge.svg)](https://github.com/Mythicc123/ec2-static-site/actions/workflows/deploy.yml)
 
-🌐 **Live site:** [http://54.66.248.75](http://54.66.248.75) &nbsp;|&nbsp; 📋 **Project spec:** [roadmap.sh/projects/ec2-instance](https://roadmap.sh/projects/ec2-instance)
+🎬 **Demo available on request** — spins up in ~5 minutes via [GitHub Actions](https://github.com/Mythicc123/ec2-static-site/actions/workflows/portfolio.yml) &nbsp;|&nbsp; 📋 **Project spec:** [roadmap.sh/projects/ec2-instance](https://roadmap.sh/projects/ec2-instance)
 
 ---
 
